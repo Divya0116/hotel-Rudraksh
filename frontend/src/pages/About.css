@@ -1,0 +1,71 @@
+.about-page {
+  min-height: 100vh;
+}
+
+.about-hero {
+  background: var(--accent-color);
+  color: white;
+  padding: 5rem 0;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.about-content {
+  padding: 5rem 0;
+}
+
+.about-section {
+  margin-bottom: 4rem;
+}
+
+.about-section h2 {
+  font-size: 2.2rem;
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.about-section p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-light);
+}
+
+.features-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-white);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(155, 180, 192, 0.2);
+}
+
+.feature-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-color);
+}
+
+.feature-item .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.feature-item h3 {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}

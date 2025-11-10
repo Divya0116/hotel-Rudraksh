@@ -1,0 +1,30 @@
+:root {
+  --primary-color: #9bb4c0;
+  --secondary-color: #a18d6d;
+  --accent-color: #703b3b;
+  --neutral-color: #e1d0b3;
+  --text-color: #2d3436;
+  --text-light: #5a5a5a;
+  --bg-light: #faf9f7;
+  --bg-white: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(112, 59, 59, 0.08);
+  --shadow-md: 0 4px 16px rgba(112, 59, 59, 0.12);
+  --shadow-lg: 0 8px 24px rgba(112, 59, 59, 0.15);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-light);
+  color: var(--text-color);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}

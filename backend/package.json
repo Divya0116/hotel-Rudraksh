@@ -1,0 +1,16 @@
+{
+  "name": "rudaraksh-hotel-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Rudaraksh Hotel",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server-simple.js",
+    "dev": "node server-simple.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sql.js": "^1.13.0"
+  }
+}
