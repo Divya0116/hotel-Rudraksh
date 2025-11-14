@@ -14,6 +14,12 @@ const formatDate = (date) => {
 function Home() {
   const [rooms, setRooms] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [roomLayout, setRoomLayout] = useState(() => {
+    if (typeof window === "undefined") {
+      return "list";
+    }
+    return localStorage.getItem("home-room-layout") || "list";
+  });
   const navigate = useNavigate();
 
   const today = useMemo(() => formatDate(new Date()), []);
@@ -39,12 +45,54 @@ function Home() {
     []
   );
 
+  const guestReviews = useMemo(
+    () => [
+      {
+        id: 1,
+        name: "Neha Sharma",
+        role: "Solo Traveler",
+        avatar:
+          "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=300&q=60",
+        rating: 5,
+        quote:
+          "The rooms were spotless and the staff made sure I felt at home. Perfect stop for a peaceful getaway.",
+      },
+      {
+        id: 2,
+        name: "Arjun Mehta",
+        role: "Business Guest",
+        avatar:
+          "https://images.unsplash.com/photo-1544723795-3fb7ec5d46a9?auto=format&fit=crop&w=300&q=60",
+        rating: 4,
+        quote:
+          "Great value for money and very convenient location. Loved the quick check-in and warm hospitality.",
+      },
+      {
+        id: 3,
+        name: "Priya & Rohan",
+        role: "Family Stay",
+        avatar:
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=60",
+        rating: 5,
+        quote:
+          "Our family room was spacious and cozy. The kids still talk about the breakfast! Highly recommend.",
+      },
+    ],
+    []
+  );
+
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/rooms")
       .then((res) => setRooms(res.data.slice(0, 3)))
       .catch((err) => console.error(err));
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("home-room-layout", roomLayout);
+    }
+  }, [roomLayout]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,6 +159,8 @@ function Home() {
     navigate("/rooms", { state: bookingDetails });
   };
 
+  const handleLayoutChange = (layout) => () => setRoomLayout(layout);
+
   return (
     <div className="home">
       {/* Hero Section */}
@@ -141,7 +191,7 @@ function Home() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Hotel Rudraksh
+            Rudraksh
           </motion.h1>
           <motion.div
             className="hero-divider"
@@ -220,14 +270,13 @@ function Home() {
                 </select>
               </div>
             </div>
-           
+
             {/* <div className="booking-rate">
               From <span>₹9,750</span> INR/Night
             </div> */}
             <button type="submit" className="booking-submit">
               Book Now
             </button>
-            <div className="booking-direct">Book Direct!</div>
           </motion.form>
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -316,7 +365,7 @@ function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
               >
-                Stay in Opulence and Comfort at Our Hotel
+                Stay in Comfort and Simplicity at Hotel Rudraksh
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -324,25 +373,15 @@ function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
               >
-                Perched amid hills and lush green valleys, Rudaraksh Hotel oozes
-                sheer comfort, luxury, and sublime tranquillity. Experience a
-                serene stay at one of the best hotels as the pleasant winds
-                whisper through the pine trees, creating a paradise-like
-                sojourn. It is beautifully spread across a manicured and
-                landscaped estate, surrounded by nothing but pristine nature.
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-              >
-                Our location is perfect for couples and leisure travellers who
-                wish to escape chaotic everyday life. Pause, and take a breather
-                at our hotel for a refreshing experience that rejuvenates your
-                mind, body, and soul. Whether you're seeking a romantic getaway
-                or a peaceful retreat, Rudaraksh Hotel offers the perfect blend
-                of luxury and natural beauty.
+                Welcome to Hotel Rudraksh, your cozy stay in the heart of
+                Pinjore, located conveniently on Nalagarh Road. We believe in
+                offering comfort, cleanliness, and warm hospitality without
+                unnecessary frills. Whether you're stopping by for a short break
+                or a peaceful night’s rest, Hotel Rudraksh provides a calm and
+                homely atmosphere that makes every guest feel at ease. With
+                well-maintained rooms, friendly service, and an easy-to-reach
+                location, we’re here to make your stay simple, comfortable, and
+                satisfying — just the way you like it.
               </motion.p>
             </motion.div>
             <motion.div
@@ -352,10 +391,7 @@ function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=1000&fit=crop"
-                alt="Rudaraksh Hotel"
-              />
+              <img src="/hotel entrance.jpeg" alt="Rudaraksh Hotel" />
             </motion.div>
           </div>
         </div>
@@ -365,41 +401,163 @@ function Home() {
       <section className="featured-rooms">
         <div className="container">
           <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            className="featured-rooms-title"
           >
             Featured Rooms
           </motion.h2>
-          <div className="rooms-grid">
-            {rooms.map((room, index) => (
-              <motion.div
-                key={room.id}
-                className="room-card"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
+          <div
+            className="rooms-layout-toggle"
+            role="group"
+            aria-label="Room layout"
+          >
+            <div className="layout-toggle">
+              <button
+                type="button"
+                onClick={handleLayoutChange("list")}
+                className={`layout-toggle-button ${
+                  roomLayout === "list" ? "active" : ""
+                }`}
+                aria-pressed={roomLayout === "list"}
               >
-                <img src={room.image_url} alt={room.name} />
-                <div className="room-info">
-                  <h3>{room.name}</h3>
-                  <p>{room.description}</p>
-                  <div className="room-details">
-                    <span>💵 ₹{room.price}</span>
-                    <span>👥 Up to {room.capacity} guests</span>
+                <span aria-hidden="true">☰</span>
+                <span className="toggle-text">List</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLayoutChange("grid")}
+                className={`layout-toggle-button ${
+                  roomLayout === "grid" ? "active" : ""
+                }`}
+                aria-pressed={roomLayout === "grid"}
+              >
+                <span aria-hidden="true">▦</span>
+                <span className="toggle-text">Grid</span>
+              </button>
+            </div>
+          </div>
+          <div className={`rooms-grid rooms-grid--${roomLayout}`}>
+            {rooms.map((room, index) => {
+              const nightlyRate = Number(room.price);
+              const formatCurrency = (value, fractionDigits = 0) => {
+                if (!Number.isFinite(value)) {
+                  return null;
+                }
+                return value.toLocaleString("en-IN", {
+                  minimumFractionDigits: fractionDigits,
+                  maximumFractionDigits: fractionDigits,
+                });
+              };
+
+              return (
+                <motion.div
+                  key={room.id}
+                  className="room-card"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 }}
+                >
+                  <div className="room-card-media">
+                    <img
+                      src={room.image_url}
+                      alt={room.name}
+                      className="room-card-image"
+                    />
                   </div>
-                  <Link to={`/booking/${room.id}`} className="btn">
-                    Book Now
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="room-card-body">
+                    <h3 className="room-card-title">{room.name}</h3>
+                    <div className="room-card-price">
+                      {Number.isFinite(nightlyRate) && (
+                        <div className="room-card-price-current">
+                          ₹{formatCurrency(nightlyRate)}
+                          <span>INR / Night</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="room-card-actions">
+                      <Link
+                        to={`/booking/${room.id}`}
+                        className="btn room-card-button"
+                      >
+                        Book Now
+                      </Link>
+                      <Link to="/rooms" className="room-card-more">
+                        More details
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
           <div style={{ textAlign: "center", marginTop: "2rem" }}>
-            <Link to="/rooms" className="btn">
+            <Link to="/rooms" className="btn view-all-rooms-btn">
               View All Rooms
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews Section */}
+      <section className="reviews-section">
+        <div className="container">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="reviews-title"
+          >
+            Guest Reviews
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="reviews-subtitle"
+          >
+            Real stories from guests who chose the comfort of Hotel Rudraksh.
+          </motion.p>
+          <div className="reviews-grid">
+            {guestReviews.map((review, index) => (
+              <motion.article
+                key={review.id}
+                className="review-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+              >
+                <div className="review-card-header">
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
+                    className="review-card-avatar"
+                  />
+                  <div>
+                    <h3 className="review-card-name">{review.name}</h3>
+                    <p className="review-card-role">{review.role}</p>
+                    <div className="review-card-rating" aria-label="Rating">
+                      {Array.from({ length: 5 }).map((_, starIndex) => (
+                        <span
+                          key={starIndex}
+                          className={
+                            starIndex < review.rating ? "star active" : "star"
+                          }
+                          aria-hidden="true"
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="review-card-quote">“{review.quote}”</p>
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>

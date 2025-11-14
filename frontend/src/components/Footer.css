@@ -1,5 +1,5 @@
 .footer {
-  background: var(--accent-color);
+  background: #21293b;
   color: white;
   margin-top: auto;
   padding: 1.5rem 0 1rem;
@@ -54,7 +54,7 @@
 .footer-bottom {
   text-align: center;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   z-index: 1;
 }
