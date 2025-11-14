@@ -23,7 +23,7 @@ function Navbar() {
           onMouseLeave={hideSidebar}
         >
           <Link to="/" className="logo">
-            <h2>Rudaraksh Hotel</h2>
+            <h2>Rudraksh</h2>
           </Link>
           <AnimatePresence>
             {isSidebarOpen && (
@@ -84,14 +84,14 @@ function Navbar() {
           <li>
             <Link to="/contact">Contact</Link>
           </li>
-          <li className="nav-phone">
+          {/* <li className="nav-phone">
             <a href="tel:9350969904" className="phone-link">
               <span className="phone-icon" aria-hidden="true">
                 📞
               </span>
               9350969904
             </a>
-          </li>
+          </li> */}
         </ul>
       </div>
     </motion.nav>
