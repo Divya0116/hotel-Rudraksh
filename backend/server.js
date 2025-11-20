@@ -1,10 +1,17 @@
 import express from "express";
 import cors from "cors";
-import initSqlJs from "sql.js";
+import mongoose from "mongoose";
 import fs from "fs";
 import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
+import dotenv from "dotenv";
+import Room from "./models/Room.js";
+import Booking from "./models/Booking.js";
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,161 +22,81 @@ const PORT = 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Serve static files from public folder
+app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/", express.static(path.join(__dirname, "public")));
 
-// Database
-let db;
-const dbPath = "hotel.db";
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, "public");
+    // Ensure public directory exists
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename: timestamp-room-{roomId}-originalname
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext).replace(/\s+/g, "-");
+    cb(null, `room-${uniqueSuffix}-${name}${ext}`);
+  },
+});
 
-// Initialize database
+const fileFilter = (req, file, cb) => {
+  // Accept only image files
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
+
+// MongoDB Connection
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://your-username:your-password@cluster.mongodb.net/hotel?retryWrites=true&w=majority";
+
+// Initialize database connection
 async function initDatabase() {
   try {
-    const SQL = await initSqlJs({
-      locateFile: (file) =>
-        path.join(__dirname, "node_modules", "sql.js", "dist", file),
-    });
-
-    if (fs.existsSync(dbPath)) {
-      const buffer = fs.readFileSync(dbPath);
-      db = new SQL.Database(buffer);
-      console.log("Loaded existing database");
-    } else {
-      db = new SQL.Database();
-      createTables();
-      seedRooms();
-      saveDatabase();
-      console.log("Created new database");
+    // Check if using placeholder connection string
+    if (
+      MONGODB_URI.includes("your-username") ||
+      MONGODB_URI.includes("your-password")
+    ) {
+      console.warn("⚠️  WARNING: Using placeholder MongoDB connection string!");
+      console.warn(
+        "⚠️  Please create a .env file with your MongoDB Atlas connection string."
+      );
+      console.warn(
+        "⚠️  Example: MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/hotel?retryWrites=true&w=majority"
+      );
+      console.warn(
+        "⚠️  Server will continue but database operations will fail until connection is configured."
+      );
+      return;
     }
-    console.log("Database initialized successfully");
+
+    await mongoose.connect(MONGODB_URI);
+    console.log("✅ Connected to MongoDB Atlas successfully");
   } catch (error) {
-    console.error("Database initialization error:", error);
-  }
-}
-
-function createTables() {
-  db.run(`
-    CREATE TABLE rooms (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      description TEXT,
-      price REAL NOT NULL,
-      capacity INTEGER NOT NULL,
-      amenities TEXT,
-      image_url TEXT,
-      available INTEGER DEFAULT 1
+    console.error("❌ Database connection error:", error.message);
+    console.error(
+      "⚠️  Please check your MongoDB Atlas connection string in .env file"
     );
-  `);
-
-  db.run(`
-    CREATE TABLE bookings (
-      id TEXT PRIMARY KEY,
-      room_id INTEGER NOT NULL,
-      guest_name TEXT NOT NULL,
-      guest_email TEXT NOT NULL,
-      guest_phone TEXT NOT NULL,
-      check_in TEXT NOT NULL,
-      check_out TEXT NOT NULL,
-      guests INTEGER NOT NULL,
-      total_price REAL NOT NULL,
-      status TEXT DEFAULT 'pending',
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-}
-
-function seedRooms() {
-  const rooms = [
-    [
-      "Deluxe Suite",
-      "Spacious suite with king-size bed and ocean view",
-      2999,
-      2,
-      "WiFi, TV, AC, Mini Bar, Balcony",
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
-      1,
-    ],
-    [
-      "Premium Room",
-      "Comfortable room with city view and modern amenities",
-      1999,
-      2,
-      "WiFi, TV, AC, Coffee Maker",
-      "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800",
-      1,
-    ],
-    [
-      "Standard Room",
-      "Cozy room perfect for short stays",
-      1499,
-      2,
-      "WiFi, TV, AC",
-      "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800",
-      1,
-    ],
-    [
-      "Family Suite",
-      "Large suite perfect for families with kids",
-      3499,
-      4,
-      "WiFi, TV, AC, Kitchenette, Extra Beds",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
-      1,
-    ],
-    [
-      "Presidential Suite",
-      "Luxury suite with premium amenities and panoramic views",
-      5999,
-      2,
-      "WiFi, TV, AC, Jacuzzi, Butler Service, Private Lounge",
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
-      1,
-    ],
-    [
-      "Economy Room",
-      "Budget-friendly room with all essential amenities",
-      999,
-      1,
-      "WiFi, TV, AC",
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
-      1,
-    ],
-  ];
-
-  const stmt = db.prepare(
-    "INSERT INTO rooms (name, description, price, capacity, amenities, image_url, available) VALUES (?, ?, ?, ?, ?, ?, ?)"
-  );
-  rooms.forEach((room) => {
-    stmt.run(room);
-  });
-  stmt.free();
-}
-
-function saveDatabase() {
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(dbPath, buffer);
-}
-
-function query(sql, params = []) {
-  try {
-    const results = [];
-    const stmt = db.prepare(sql);
-
-    if (params && params.length > 0) {
-      for (let i = 0; i < params.length; i++) {
-        stmt.bind([params[i]]);
-      }
-    }
-
-    while (stmt.step()) {
-      const row = stmt.getAsObject();
-      results.push(row);
-    }
-
-    stmt.free();
-    return results;
-  } catch (error) {
-    console.error("Query error:", error);
-    return [];
+    console.error("⚠️  Server will continue but database operations will fail");
+    // Don't exit - allow server to start for development/testing
   }
 }
 
@@ -177,9 +104,9 @@ function query(sql, params = []) {
 initDatabase();
 
 // Get all rooms
-app.get("/api/rooms", (req, res) => {
+app.get("/api/rooms", async (req, res) => {
   try {
-    const rooms = query("SELECT * FROM rooms");
+    const rooms = await Room.find();
     res.json(rooms);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch rooms" });
@@ -187,13 +114,11 @@ app.get("/api/rooms", (req, res) => {
 });
 
 // Get single room
-app.get("/api/rooms/:id", (req, res) => {
+app.get("/api/rooms/:id", async (req, res) => {
   try {
-    const rooms = query("SELECT * FROM rooms WHERE id = ?", [
-      parseInt(req.params.id),
-    ]);
-    if (rooms.length > 0) {
-      res.json(rooms[0]);
+    const room = await Room.findById(req.params.id);
+    if (room) {
+      res.json(room);
     } else {
       res.status(404).json({ error: "Room not found" });
     }
@@ -202,8 +127,192 @@ app.get("/api/rooms/:id", (req, res) => {
   }
 });
 
+// Create new room (POST) - with file upload support
+app.post("/api/rooms", upload.single("image"), async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      price,
+      capacity,
+      amenities,
+      image_url,
+      category,
+      available,
+    } = req.body;
+
+    // Validation
+    if (!name || !price || !capacity || !category) {
+      // If file was uploaded but validation failed, delete it
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({
+        error:
+          "Missing required fields: name, price, capacity, and category are required",
+      });
+    }
+
+    // Determine image URL: use uploaded file or provided URL
+    let finalImageUrl = image_url || "";
+    if (req.file) {
+      // Use the uploaded file path (relative to public folder)
+      finalImageUrl = `/${req.file.filename}`;
+    }
+
+    const newRoom = new Room({
+      name,
+      description: description || "",
+      price: parseFloat(price),
+      capacity: parseInt(capacity),
+      amenities: amenities || "",
+      image_url: finalImageUrl,
+      category,
+      available: available !== undefined ? parseInt(available) : 1,
+    });
+
+    await newRoom.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Room created successfully",
+      room: newRoom,
+    });
+  } catch (error) {
+    // If file was uploaded but error occurred, delete it
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({
+      error: "Failed to create room",
+      details: error.message,
+    });
+  }
+});
+
+// Update room (PUT) - with file upload support
+app.put("/api/rooms/:id", upload.single("image"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      price,
+      capacity,
+      amenities,
+      image_url,
+      category,
+      available,
+    } = req.body;
+
+    // Check if room exists
+    const existingRoom = await Room.findById(id);
+    if (!existingRoom) {
+      // If file was uploaded but room not found, delete it
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Build update object dynamically based on provided fields
+    const updateData = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = parseFloat(price);
+    if (capacity !== undefined) updateData.capacity = parseInt(capacity);
+    if (amenities !== undefined) updateData.amenities = amenities;
+    if (category !== undefined) updateData.category = category;
+    if (available !== undefined) updateData.available = parseInt(available);
+
+    // Handle image: if file uploaded, use it; otherwise use provided URL or keep existing
+    if (req.file) {
+      // Delete old image if it exists and is not a default/placeholder
+      if (existingRoom.image_url && existingRoom.image_url.startsWith("/")) {
+        const oldImagePath = path.join(
+          __dirname,
+          "public",
+          existingRoom.image_url.substring(1)
+        );
+        if (fs.existsSync(oldImagePath)) {
+          try {
+            fs.unlinkSync(oldImagePath);
+          } catch (err) {
+            console.error("Error deleting old image:", err);
+          }
+        }
+      }
+      updateData.image_url = `/${req.file.filename}`;
+    } else if (image_url !== undefined) {
+      updateData.image_url = image_url;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      // If file was uploaded but no updates, delete it
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    const updatedRoom = await Room.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.json({
+      success: true,
+      message: "Room updated successfully",
+      room: updatedRoom,
+    });
+  } catch (error) {
+    // If file was uploaded but error occurred, delete it
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({
+      error: "Failed to update room",
+      details: error.message,
+    });
+  }
+});
+
+// Delete room (DELETE)
+app.delete("/api/rooms/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if room exists
+    const existingRoom = await Room.findById(id);
+    if (!existingRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Check if room has any bookings
+    const bookings = await Booking.find({ room_id: id });
+    if (bookings.length > 0) {
+      return res.status(400).json({
+        error:
+          "Cannot delete room with existing bookings. Please cancel bookings first.",
+      });
+    }
+
+    await Room.findByIdAndDelete(id);
+    res.json({
+      success: true,
+      message: "Room deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to delete room",
+      details: error.message,
+    });
+  }
+});
+
 // Create booking
-app.post("/api/bookings", (req, res) => {
+app.post("/api/bookings", async (req, res) => {
   try {
     const {
       room_id,
@@ -217,23 +326,25 @@ app.post("/api/bookings", (req, res) => {
     } = req.body;
     const booking_id = crypto.randomUUID();
 
-    const stmt = db.prepare(
-      "INSERT INTO bookings (id, room_id, guest_name, guest_email, guest_phone, check_in, check_out, guests, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    );
-    stmt.run([
-      booking_id,
-      room_id,
+    // Validate room exists
+    const room = await Room.findById(room_id);
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    const newBooking = new Booking({
+      id: booking_id,
+      room_id: new mongoose.Types.ObjectId(room_id),
       guest_name,
       guest_email,
       guest_phone,
       check_in,
       check_out,
-      guests,
-      total_price,
-    ]);
-    stmt.free();
+      guests: parseInt(guests),
+      total_price: parseFloat(total_price),
+    });
 
-    saveDatabase();
+    await newBooking.save();
     res.json({
       success: true,
       booking_id,
@@ -247,28 +358,35 @@ app.post("/api/bookings", (req, res) => {
 });
 
 // Get all bookings
-app.get("/api/bookings", (req, res) => {
+app.get("/api/bookings", async (req, res) => {
   try {
-    const bookings = query(`
-      SELECT b.*, r.name as room_name, r.description as room_description
-      FROM bookings b
-      JOIN rooms r ON b.room_id = r.id
-      ORDER BY b.created_at DESC
-    `);
-    res.json(bookings);
+    const bookings = await Booking.find()
+      .populate("room_id", "name description")
+      .sort({ createdAt: -1 });
+
+    // Transform to match the expected format
+    const formattedBookings = bookings.map((booking) => {
+      const bookingObj = booking.toObject();
+      return {
+        ...bookingObj,
+        room_name: bookingObj.room_id?.name || "",
+        room_description: bookingObj.room_id?.description || "",
+        created_at: bookingObj.createdAt,
+      };
+    });
+
+    res.json(formattedBookings);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch bookings" });
   }
 });
 
 // Get single booking
-app.get("/api/bookings/:id", (req, res) => {
+app.get("/api/bookings/:id", async (req, res) => {
   try {
-    const bookings = query("SELECT * FROM bookings WHERE id = ?", [
-      req.params.id,
-    ]);
-    if (bookings.length > 0) {
-      res.json(bookings[0]);
+    const booking = await Booking.findOne({ id: req.params.id });
+    if (booking) {
+      res.json(booking);
     } else {
       res.status(404).json({ error: "Booking not found" });
     }
@@ -278,14 +396,19 @@ app.get("/api/bookings/:id", (req, res) => {
 });
 
 // Update booking status
-app.put("/api/bookings/:id", (req, res) => {
+app.put("/api/bookings/:id", async (req, res) => {
   try {
     const { status } = req.body;
-    const stmt = db.prepare("UPDATE bookings SET status = ? WHERE id = ?");
-    stmt.run([status, req.params.id]);
-    stmt.free();
+    const booking = await Booking.findOneAndUpdate(
+      { id: req.params.id },
+      { status },
+      { new: true }
+    );
 
-    saveDatabase();
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
     res.json({ success: true, message: "Booking status updated" });
   } catch (error) {
     res.status(500).json({ error: "Failed to update booking" });

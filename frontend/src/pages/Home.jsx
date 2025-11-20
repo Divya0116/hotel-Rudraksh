@@ -193,12 +193,20 @@ function Home() {
           >
             Rudraksh
           </motion.h1>
-          <motion.div
+          <motion.img
+            src="/golden border.png"
+            alt=""
+            className="hero-gold-border"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          />
+          {/* <motion.div
             className="hero-divider"
             initial={{ width: 0 }}
             animate={{ width: 120 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-          />
+          /> */}
           <motion.p
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -462,7 +470,7 @@ function Home() {
                 >
                   <div className="room-card-media">
                     <img
-                      src={room.image_url}
+                      src={`http://localhost:5000${room.image_url}`}
                       alt={room.name}
                       className="room-card-image"
                     />

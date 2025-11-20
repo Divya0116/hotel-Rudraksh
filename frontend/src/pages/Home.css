@@ -78,6 +78,15 @@
   text-transform: uppercase;
 }
 
+.hero-gold-border {
+  display: block;
+  margin: 0 auto;
+  width: 390px;
+  height: 100px;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
 .hero-divider {
   height: 2px;
   background: var(--secondary-color);
@@ -88,7 +97,7 @@
 .hero-subtitle {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-      margin-top: -20px;
+  margin-top: -1px;
   color: rgba(255, 255, 255, 0.85);
   font-weight: 400;
   letter-spacing: 2px;

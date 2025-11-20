@@ -17,6 +17,7 @@ db.run(`
     capacity INTEGER NOT NULL,
     amenities TEXT,
     image_url TEXT,
+    category TEXT NOT NULL,
     available BOOLEAN DEFAULT 1
   );
 `);
@@ -37,73 +38,118 @@ db.run(`
   );
 `);
 
-// Insert sample rooms
+// Insert sample rooms - 10 rooms total: 5 AC rooms and 5 Non-AC rooms only
 const rooms = [
   {
-    name: "Deluxe Suite",
-    description: "Spacious suite with king-size bed and ocean view",
-    price: 2999,
-    capacity: 2,
-    amenities: "WiFi, TV, AC, Mini Bar, Balcony",
-    image_url: "images/room 1.jpeg",
-    available: 1,
-  },
-  {
-    name: "Premium Room",
-    description: "Comfortable room with city view and modern amenities",
+    name: "Room 1",
+    description: "AC room with modern amenities",
     price: 1999,
     capacity: 2,
-    amenities: "WiFi, TV, AC, Coffee Maker",
-    image_url: "images/room 2.jpeg",
+    amenities: "WiFi, TV, AC",
+    image_url: "/room 1.jpeg",
+    category: "AC",
     available: 1,
   },
   {
-    name: "Standard Room",
-    description: "Cozy room perfect for short stays",
-    price: 1499,
+    name: "Room 2",
+    description: "AC room with comfortable facilities",
+    price: 1899,
     capacity: 2,
     amenities: "WiFi, TV, AC",
-    image_url:
-      "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800",
+    image_url: "/room 1.jpeg",
+    category: "AC",
     available: 1,
   },
   {
-    name: "Family Suite",
-    description: "Large suite perfect for families with kids",
-    price: 3499,
-    capacity: 4,
-    amenities: "WiFi, TV, AC, Kitchenette, Extra Beds",
-    image_url:
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
-    available: 1,
-  },
-  {
-    name: "Presidential Suite",
-    description: "Luxury suite with premium amenities and panoramic views",
-    price: 5999,
+    name: "Room 3",
+    description: "AC room with essential amenities",
+    price: 1799,
     capacity: 2,
-    amenities: "WiFi, TV, AC, Jacuzzi, Butler Service, Private Lounge",
-    image_url:
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+    amenities: "WiFi, TV, AC",
+    image_url: "/room 1.jpeg",
+    category: "AC",
     available: 1,
   },
   {
-    name: "Economy Room",
-    description: "Budget-friendly room with all essential amenities",
+    name: "Room 4",
+    description: "AC room with all basic facilities",
+    price: 1699,
+    capacity: 2,
+    amenities: "WiFi, TV, AC",
+    image_url: "/room 1.jpeg",
+    category: "AC",
+    available: 1,
+  },
+  {
+    name: "Room 5",
+    description: "AC room with standard amenities",
+    price: 1599,
+    capacity: 2,
+    amenities: "WiFi, TV, AC",
+    image_url: "/room 1.jpeg",
+    category: "AC",
+    available: 1,
+  },
+  {
+    name: "Room 6",
+    description: "Non-AC room with natural ventilation",
+    price: 1299,
+    capacity: 2,
+    amenities: "WiFi, TV, Fan",
+    image_url: "/room 1.jpeg",
+    category: "Non-AC",
+    available: 1,
+  },
+  {
+    name: "Room 7",
+    description: "Non-AC room with comfortable facilities",
+    price: 1199,
+    capacity: 2,
+    amenities: "WiFi, TV, Fan",
+    image_url: "/room 1.jpeg",
+    category: "Non-AC",
+    available: 1,
+  },
+  {
+    name: "Room 8",
+    description: "Non-AC room with essential amenities",
+    price: 1099,
+    capacity: 2,
+    amenities: "WiFi, TV, Fan",
+    image_url: "/room 1.jpeg",
+    category: "Non-AC",
+    available: 1,
+  },
+  {
+    name: "Room 9",
+    description: "Non-AC room with basic facilities",
     price: 999,
-    capacity: 1,
-    amenities: "WiFi, TV, AC",
-    image_url:
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+    capacity: 2,
+    amenities: "WiFi, TV, Fan",
+    image_url: "/room 1.jpeg",
+    category: "Non-AC",
+    available: 1,
+  },
+  {
+    name: "Room 10",
+    description: "Non-AC room with standard amenities",
+    price: 899,
+    capacity: 2,
+    amenities: "WiFi, TV, Fan",
+    image_url: "/room 1.jpeg",
+    category: "Non-AC",
     available: 1,
   },
 ];
 
+// Clear existing rooms
+db.run("DELETE FROM rooms");
+
 // Insert rooms
 rooms.forEach((room) => {
   const stmt = db.prepare(`
-    INSERT INTO rooms (name, description, price, capacity, amenities, image_url, available)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO rooms (name, description, price, capacity, amenities, image_url, category, available)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
   stmt.run([
     room.name,
@@ -112,6 +158,7 @@ rooms.forEach((room) => {
     room.capacity,
     room.amenities,
     room.image_url,
+    room.category,
     room.available,
   ]);
   stmt.free();
