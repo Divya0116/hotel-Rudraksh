@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
-import './About.css';
+import { motion } from "framer-motion";
+import "./About.css";
 
 function About() {
   return (
     <div className="about-page">
-      <motion.section 
+      <motion.section
         className="about-hero"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -12,13 +12,13 @@ function About() {
       >
         <div className="container">
           <h1>About Rudaraksh Hotel</h1>
-          <p>Your luxury destination in the heart of the city</p>
+          <p>Comfortable, reliable stays in the heart of Pinjore</p>
         </div>
       </motion.section>
 
       <section className="about-content">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="about-section"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -26,13 +26,15 @@ function About() {
           >
             <h2>Our Story</h2>
             <p>
-              Rudaraksh Hotel was founded with a vision to provide exceptional hospitality 
-              and create unforgettable experiences for our guests. Since our inception, we 
-              have been committed to combining traditional hospitality with modern luxury.
+              Rudaraksh Hotel was established with a simple vision&mdash;to
+              offer clean, comfortable, and reliable stays for travellers who
+              value quality at the right price. From day one, we have focused on
+              creating a welcoming environment where guests feel at home,
+              whether they are here for business, leisure, or family travel.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="about-section"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -40,13 +42,14 @@ function About() {
           >
             <h2>Our Mission</h2>
             <p>
-              To provide world-class accommodation and exceptional service, ensuring every guest 
-              leaves with cherished memories. We strive to maintain the highest standards of 
-              hospitality while respecting our guests' privacy and comfort.
+              Our mission is to deliver a pleasant and hassle-free stay through
+              consistent service, well-maintained rooms, and a guest-first
+              approach. We aim to provide honest hospitality where comfort,
+              safety, and convenience come together.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="about-section"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -56,23 +59,43 @@ function About() {
             <div className="features-list">
               <div className="feature-item">
                 <div className="icon">⭐</div>
-                <h3>Premium Quality</h3>
-                <p>High-end amenities and luxurious accommodations</p>
+                <h3>Comfort You Can Trust</h3>
+                <p>
+                  Well-furnished rooms designed to provide a peaceful, relaxing
+                  stay.
+                </p>
               </div>
               <div className="feature-item">
-                <div className="icon">🎯</div>
-                <h3>Central Location</h3>
-                <p>Conveniently located in the heart of the city</p>
+                <div className="icon">📍</div>
+                <h3>Convenient Location</h3>
+                <p>
+                  Easy access to major routes, markets, and local attractions
+                  for worry-free travel.
+                </p>
               </div>
               <div className="feature-item">
                 <div className="icon">👥</div>
-                <h3>Expert Staff</h3>
-                <p>Dedicated team committed to your satisfaction</p>
+                <h3>Friendly Staff</h3>
+                <p>
+                  A trained team ready to assist you with care, respect, and
+                  professionalism.
+                </p>
               </div>
               <div className="feature-item">
-                <div className="icon">🏆</div>
-                <h3>Award Winning</h3>
-                <p>Recognized for excellence in hospitality</p>
+                <div className="icon">🧼</div>
+                <h3>Clean &amp; Hygienic</h3>
+                <p>
+                  Regular housekeeping and high hygiene standards to ensure your
+                  comfort.
+                </p>
+              </div>
+              <div className="feature-item">
+                <div className="icon">💰</div>
+                <h3>Affordable Quality</h3>
+                <p>
+                  Modern amenities and thoughtful services at prices that suit
+                  every traveller.
+                </p>
               </div>
             </div>
           </motion.div>
@@ -83,4 +106,3 @@ function About() {
 }
 
 export default About;
-

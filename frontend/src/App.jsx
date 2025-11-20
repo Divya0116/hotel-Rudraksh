@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -8,7 +13,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/AdminDashboard";
 import Location from "./pages/Location";
-import Blogs from "./pages/Blogs";
 import "./App.css";
 
 function App() {
@@ -24,7 +28,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/location" element={<Location />} />
-          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blogs" element={<Navigate to="/contact" replace />} />
         </Routes>
         <Footer />
       </div>

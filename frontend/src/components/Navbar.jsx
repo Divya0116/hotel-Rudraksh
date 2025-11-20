@@ -50,15 +50,6 @@ function Navbar() {
                   </li>
                   <li>
                     <Link
-                      to="/blogs"
-                      className="sidebar-link"
-                      onClick={hideSidebar}
-                    >
-                      Blogs
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
                       to="/contact"
                       className="sidebar-link"
                       onClick={hideSidebar}

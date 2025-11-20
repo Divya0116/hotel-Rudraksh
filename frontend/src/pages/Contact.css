@@ -3,7 +3,7 @@
 }
 
 .contact-hero {
-  background: var(--accent-color);
+  background: linear-gradient(to bottom, #3a4a5f, #21293b, #1a1f2e);
   color: white;
   padding: 2rem 0;
   text-align: center;
