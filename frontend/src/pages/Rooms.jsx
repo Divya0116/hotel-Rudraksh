@@ -13,6 +13,11 @@ function Rooms() {
     axios
       .get("http://localhost:5000/api/rooms")
       .then((res) => {
+        // Debug: Log first room to see structure
+        if (res.data && res.data.length > 0) {
+          console.log("Sample room object:", res.data[0]);
+          console.log("Room ID:", res.data[0].id || res.data[0]._id);
+        }
         setRooms(res.data);
         setLoading(false);
       })
@@ -115,7 +120,7 @@ function Rooms() {
                   <div className="rooms-grid">
                     {roomsByCategory.AC.map((room, index) => (
                       <motion.div
-                        key={room.id}
+                        key={room.id || room._id}
                         className="room-card-large"
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -137,7 +142,10 @@ function Rooms() {
                             <span>👥 Max {room.capacity} guests</span>
                             <span>💵 ₹{room.price}/night</span>
                           </div>
-                          <Link to={`/booking/${room.id}`} className="btn">
+                          <Link
+                            to={`/booking/${room.id || room._id}`}
+                            className="btn"
+                          >
                             Book Now
                           </Link>
                         </div>
@@ -161,7 +169,7 @@ function Rooms() {
                   <div className="rooms-grid">
                     {roomsByCategory["Non-AC"].map((room, index) => (
                       <motion.div
-                        key={room.id}
+                        key={room.id || room._id}
                         className="room-card-large"
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -183,7 +191,10 @@ function Rooms() {
                             <span>👥 Max {room.capacity} guests</span>
                             <span>💵 ₹{room.price}/night</span>
                           </div>
-                          <Link to={`/booking/${room.id}`} className="btn">
+                          <Link
+                            to={`/booking/${room.id || room._id}`}
+                            className="btn"
+                          >
                             Book Now
                           </Link>
                         </div>
@@ -215,35 +226,44 @@ function Rooms() {
                   </motion.h2>
                 )}
               <div className="rooms-grid">
-                {filteredRooms.map((room, index) => (
-                  <motion.div
-                    key={room.id}
-                    className="room-card-large"
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <img
-                      src={`http://localhost:5000${room.image_url}`}
-                      alt={room.name}
-                    />
-                    <div className="room-info-large">
-                      <h2>{room.name}</h2>
-                      <p className="description">{room.description}</p>
-                      <div className="amenities">
-                        <h4>Amenities:</h4>
-                        <p>{room.amenities}</p>
+                {filteredRooms.map((room, index) => {
+                  const roomId = room.id || room._id;
+                  return (
+                    <motion.div
+                      key={roomId}
+                      className="room-card-large"
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <img
+                        src={`http://localhost:5000${room.image_url}`}
+                        alt={room.name}
+                      />
+                      <div className="room-info-large">
+                        <h2>{room.name}</h2>
+                        <p className="description">{room.description}</p>
+                        <div className="amenities">
+                          <h4>Amenities:</h4>
+                          <p>{room.amenities}</p>
+                        </div>
+                        <div className="room-specs">
+                          <span>👥 Max {room.capacity} guests</span>
+                          <span>💵 ₹{room.price}/night</span>
+                        </div>
+                        {roomId ? (
+                          <Link to={`/booking/${roomId}`} className="btn">
+                            Book Now
+                          </Link>
+                        ) : (
+                          <button className="btn" disabled>
+                            Book Now (Error)
+                          </button>
+                        )}
                       </div>
-                      <div className="room-specs">
-                        <span>👥 Max {room.capacity} guests</span>
-                        <span>💵 ₹{room.price}/night</span>
-                      </div>
-                      <Link to={`/booking/${room.id}`} className="btn">
-                        Book Now
-                      </Link>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
               {filteredRooms.length === 0 && (
                 <div className="no-rooms">

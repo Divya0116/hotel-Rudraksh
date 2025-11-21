@@ -106,8 +106,13 @@ initDatabase();
 // Get all rooms
 app.get("/api/rooms", async (req, res) => {
   try {
-    const rooms = await Room.find();
-    res.json(rooms);
+    const rooms = await Room.find().lean();
+    // Ensure _id is included in response
+    const roomsWithId = rooms.map((room) => ({
+      ...room,
+      id: room._id ? room._id.toString() : room.id,
+    }));
+    res.json(roomsWithId);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch rooms" });
   }
@@ -116,9 +121,14 @@ app.get("/api/rooms", async (req, res) => {
 // Get single room
 app.get("/api/rooms/:id", async (req, res) => {
   try {
-    const room = await Room.findById(req.params.id);
+    const room = await Room.findById(req.params.id).lean();
     if (room) {
-      res.json(room);
+      // Ensure id field is included
+      const roomWithId = {
+        ...room,
+        id: room._id ? room._id.toString() : room.id,
+      };
+      res.json(roomWithId);
     } else {
       res.status(404).json({ error: "Room not found" });
     }
